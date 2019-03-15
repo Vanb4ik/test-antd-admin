@@ -9,6 +9,7 @@ import {
   pathMatchRegexp,
   addLangPrefix,
 } from 'utils'
+
 import store from 'store'
 
 const { SubMenu } = Menu

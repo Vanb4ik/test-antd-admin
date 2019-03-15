@@ -11,6 +11,7 @@ import { enquireScreen, unenquireScreen } from 'enquire-js'
 import { config, pathMatchRegexp, langFromPath } from 'utils'
 import Error from '../pages/404'
 import styles from './PrimaryLayout.less'
+import Custom from '../pages/custom'
 
 const { Content } = Layout
 const { Header, Bread, Sider } = MyLayout
@@ -54,22 +55,39 @@ class PrimaryLayout extends PureComponent {
       permissions,
       notifications,
     } = app
+
     const { isMobile } = this.state
     const { onCollapseChange } = this
 
     // Localized route name.
 
     const lang = langFromPath(location.pathname)
-    const newRouteList =
-      lang !== 'en'
-        ? routeList.map(item => {
-            const { name, ...other } = item
-            return {
-              ...other,
-              name: (item[lang] || {}).name || name,
-            }
-          })
-        : routeList
+    const dashBoardItem = routeList.find(m => m.name == 'Dashboard')
+    const newRouteList = []
+
+    ;(() => {
+      if (lang !== 'en') {
+        const { name, ...other } = dashBoardItem
+        const newItem = {
+          ...dashBoardItem,
+          name: (dashBoardItem[lang] || {}).name || name,
+        }
+        newRouteList.push(newItem)
+      } else {
+        newRouteList.push(dashBoardItem)
+      }
+    })()
+    // const newRouteList =
+    //   lang !== 'en'
+    //     ? routeList.map(item => {
+    //
+    //       const { name, ...other } = item
+    //       return {
+    //         ...other,
+    //         name: (item[lang] || {}).name || name,
+    //       }
+    //     })
+    //     : routeList
 
     // Find a route that matches the pathname.
     const currentRoute = newRouteList.find(
@@ -143,7 +161,7 @@ class PrimaryLayout extends PureComponent {
             <Header {...headerProps} />
             <Content className={styles.content}>
               <Bread routeList={newRouteList} />
-              {hasPermission ? children : <Error />}
+              {hasPermission ? <Custom /> : <Error />}
             </Content>
             <BackTop
               className={styles.backTop}
