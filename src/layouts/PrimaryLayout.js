@@ -11,7 +11,6 @@ import { enquireScreen, unenquireScreen } from 'enquire-js'
 import { config, pathMatchRegexp, langFromPath } from 'utils'
 import Error from '../pages/404'
 import styles from './PrimaryLayout.less'
-import Custom from '../pages/custom'
 
 const { Content } = Layout
 const { Header, Bread, Sider } = MyLayout
@@ -62,34 +61,17 @@ class PrimaryLayout extends PureComponent {
     // Localized route name.
 
     const lang = langFromPath(location.pathname)
-    const dashBoardItem = routeList.find(m => m.name == 'Dashboard')
-    const newRouteList = []
+    const newRouteList =
+      lang !== 'en'
+        ? routeList.map(item => {
+            const { name, ...other } = item
+            return {
+              ...other,
+              name: (item[lang] || {}).name || name,
+            }
+          })
+        : routeList
 
-    ;(() => {
-      if (lang !== 'en') {
-        const { name, ...other } = dashBoardItem
-        const newItem = {
-          ...dashBoardItem,
-          name: (dashBoardItem[lang] || {}).name || name,
-        }
-        newRouteList.push(newItem)
-      } else {
-        newRouteList.push(dashBoardItem)
-      }
-    })()
-    // const newRouteList =
-    //   lang !== 'en'
-    //     ? routeList.map(item => {
-    //
-    //       const { name, ...other } = item
-    //       return {
-    //         ...other,
-    //         name: (item[lang] || {}).name || name,
-    //       }
-    //     })
-    //     : routeList
-
-    // Find a route that matches the pathname.
     const currentRoute = newRouteList.find(
       _ => _.route && pathMatchRegexp(_.route, location.pathname)
     )
@@ -161,7 +143,7 @@ class PrimaryLayout extends PureComponent {
             <Header {...headerProps} />
             <Content className={styles.content}>
               <Bread routeList={newRouteList} />
-              {hasPermission ? <Custom /> : <Error />}
+              {hasPermission ? children : <Error />}
             </Content>
             <BackTop
               className={styles.backTop}
